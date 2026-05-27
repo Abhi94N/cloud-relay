@@ -1,0 +1,41 @@
+# Keep the build context small. Anything not needed to produce the image
+# (caches, venvs, tests, docs, CI config) is excluded.
+
+# VCS / CI
+.git/
+.gitignore
+.github/
+.gitlab-ci.yml
+
+# Local environments
+.venv/
+.env
+.python-version
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+dist/
+build/
+
+# Editor / IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Not needed in the build context
+tests/
+docs/
+*.example
+Dockerfile
+.dockerignore
+# README.md is intentionally NOT ignored -- pyproject.toml's
+# `readme = "README.md"` causes `uv sync` to fail without it.
