@@ -1,0 +1,78 @@
+# cloud-relay GitLab CI pipeline.
+#
+# This entire file is commented out by default. To enable, remove the leading
+# `# ` on every non-blank line (or in your editor: select all -> uncomment).
+# Once uncommented, pushes will run lint/typecheck/test on every branch and
+# build+publish to the project's GitLab Package Registry on tag pushes.
+#
+# Required CI/CD variables (Settings -> CI/CD -> Variables):
+#   - none for the default flow: $CI_JOB_TOKEN is auto-injected and has scope
+#     to publish to this project's Package Registry.
+#
+# Consumers install the published package with:
+#   pip install --extra-index-url \
+#     "https://__token__:<deploy-token>@gitlab.com/api/v4/projects/${CI_PROJECT_ID}/packages/pypi/simple" \
+#     cloud-relay[api]
+#
+# ---------------------------------------------------------------------------
+
+# stages:
+#   - lint
+#   - typecheck
+#   - test
+#   - build
+#   - publish
+#
+# default:
+#   image: python:3.12-slim
+#   before_script:
+#     - pip install --quiet uv
+#     - uv sync --all-extras --frozen
+#   cache:
+#     key:
+#       files: [uv.lock]
+#     paths: [.venv/, .uv-cache/]
+#
+# variables:
+#   UV_CACHE_DIR: .uv-cache
+#   UV_LINK_MODE: copy        # avoid hardlink warnings in CI containers
+#
+# lint:
+#   stage: lint
+#   script:
+#     - uv run ruff check .
+#     - uv run ruff format --check .
+#
+# typecheck:
+#   stage: typecheck
+#   script:
+#     - uv run mypy
+#
+# test:
+#   stage: test
+#   script:
+#     - uv run coverage run -m pytest -q
+#     - uv run coverage report
+#   coverage: '/^TOTAL.+?(\d+\%)$/'
+#
+# build:
+#   stage: build
+#   script:
+#     - uv build
+#   artifacts:
+#     paths: [dist/]
+#     expire_in: 1 week
+#
+# publish:
+#   stage: publish
+#   needs: [build]
+#   rules:
+#     - if: '$CI_COMMIT_TAG'           # only on tagged releases (e.g. v0.1.0)
+#   script:
+#     - pip install --quiet twine
+#     - TWINE_USERNAME=gitlab-ci-token
+#       TWINE_PASSWORD=$CI_JOB_TOKEN
+#       twine upload
+#       --repository-url "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi"
+#       --non-interactive
+#       dist/*
